@@ -1,7 +1,7 @@
 
 # Voicemeeter-remote
 
-Voicemeeter-remote is a Node.js wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter], [Voicemeeter banana][voicemeeter-banana], [Voicemeeter potato][voicemeeter-potato]. More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
+Voicemeeter-remote is a Node.js wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter], [Voicemeeter banana][voicemeeter-banana], or [Voicemeeter potato][voicemeeter-potato]. More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
 
 # How to use it ?
 ### First install it
