@@ -1,18 +1,18 @@
 
 # Voicemeeter-remote
 
-Voicemeeter-remote is a Node.js wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter] ( or [Voicemeeter banana][voicemeeter-banana] ). More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
+Voicemeeter-remote is a Node.js wrapper for the official voicemeeterRemote DLL available in the installation directory of [Voicemeeter][voicemeeter], [Voicemeeter banana][voicemeeter-banana], [Voicemeeter potato][voicemeeter-potato]. More informations about the DLL is available [here](https://forum.vb-audio.com/viewtopic.php?f=8&t=346)
 
 # How to use it ?
 ### First install it
 
 ```sh
-$ npm i voicemeeter-remote --save
+$ npm i voicemeeter-remote-potato --save
 ```
 ### Then use it in your own program
 
 ```js
-const voicemeeter = require('voicemeeter-remote');
+const voicemeeter = require('voicemeeter-remote-potato');
 
 voicemeeter.init().then(()=>{
     voicemeeter.login();
@@ -62,14 +62,13 @@ Fork the project make your change then do a pull request.
 
 #### Dependencies
 
-[`ffi`][ffi] => Read and execute the VoicemeeterRemote DLL
+[`ffi-napi`][ffi] => Read and execute the VoicemeeterRemote DLL
 
 [`ref-array`][ref-array] => Create array (*pointer) for `ffi` to return string from the DLL
 
 [`winreg`][winreg] => Read the windows registery to find Voicemeeter installation folder and the DLL
 
 # Usage
-[`voicemeeter-api`][voicemeeter-api] => A RESTfull API to control voicemeeter with HTTP request
 
 ###### Make yours and send me the link
 
@@ -80,7 +79,8 @@ MIT
 
    [voicemeeter]: <https://www.vb-audio.com/Voicemeeter/index.htm>
    [voicemeeter-banana]: <https://www.vb-audio.com/Voicemeeter/banana.htm>
+   [voicemeeter-potato]: <https://www.vb-audio.com/Voicemeeter/potato.htm>
    [voicemeeter-api]: <https://github.com/Mikatux/voicemeeter-api>
-   [ffi]: <https://www.npmjs.com/package/ffi>
+   [ffi]: <https://www.npmjs.com/package/ffi-napi>
    [ref-array]: <https://www.npmjs.com/package/ref-array>
    [winreg]: <https://www.npmjs.com/package/winreg>
