@@ -1,5 +1,5 @@
 const ref = require('ref');
-const ffi = require('ffi');
+const ffi = require('ffi-napi');
 const Registry = require('winreg');
 
 const ArrayType = require('ref-array');
@@ -15,7 +15,7 @@ async function getDLLPath() {
   return new Promise(resolve => {
     regKey.values((err, items) => {
       const unistallerPath = items.find(i => i.name === 'UninstallString').value;
-      const fileNameIndex = unistallerPath.lastIndexOf('\\')
+      const fileNameIndex = unistallerPath.lastIndexOf('\\');
       resolve(unistallerPath.slice(0, fileNameIndex));
     });
   });
@@ -34,7 +34,7 @@ const isEmpty = function (object) {
       return false;
   }
   return true;
-}
+};
 
 let libvoicemeeter;
 
@@ -47,7 +47,7 @@ const voicemeeter = {
   version: null,
   voicemeeterConfig: {},
   async init(){
-
+    console.debug(await getDLLPath() + '/VoicemeeterRemote64.dll');
     libvoicemeeter = ffi.Library(await getDLLPath() + '/VoicemeeterRemote64.dll', {
       'VBVMR_Login': ['long', []],
       'VBVMR_Logout': ['long', []],
@@ -70,7 +70,7 @@ const voicemeeter = {
   },
 
   runvoicemeeter(voicemeeterType) {
-    if (libvoicemeeter.VBVMR_RunVoicemeeter(voicemeeterType) == 0) {
+    if (libvoicemeeter.VBVMR_RunVoicemeeter(voicemeeterType) === 0) {
       return;
     }
     throw "running failed";
@@ -82,8 +82,8 @@ const voicemeeter = {
     if (!this.isConnected) {
       throw "Not connected ";
     }
-    var hardwareIdPtr = new Buffer(parameterName.length + 1);;
-    hardwareIdPtr.write(parameterName)
+    var hardwareIdPtr = new Buffer(parameterName.length + 1);
+    hardwareIdPtr.write(parameterName);
     var namePtr = new FloatArray(1);
     libvoicemeeter.VBVMR_GetParameterFloat(hardwareIdPtr,namePtr);
     return namePtr[0]
@@ -96,10 +96,10 @@ const voicemeeter = {
     switch (typePtr[0]) {
       case 1: // Voicemeeter software
         return VoicemeeterType.voicemeeter;
-        break;
       case 2: // Voicemeeter Banana software
-        return VoicemeeterType.voicemeeterBanana
-        break;
+        return VoicemeeterType.voicemeeterBanana;
+      case 3:
+        return VoicemeeterType.voicemetterPotato;
       default: // unknow software
         return VoicemeeterType.unknow
     }
@@ -110,12 +110,11 @@ const voicemeeter = {
     if (libvoicemeeter.VBVMR_GetVoicemeeterVersion(versionPtr) !== 0) {
       throw "running failed";
     }
-    const v4 = versionPtr[0]%(2^8)
-    const v3 = parseInt((versionPtr[0]-v4)%Math.pow(2, 16)/Math.pow(2, 8))
-    const v2 = parseInt(((versionPtr[0]-v3*256-v4)%Math.pow(2, 24))/Math.pow(2, 16))
-    const v1 = parseInt((versionPtr[0]-v2*512-v3*256-v4)/Math.pow(2, 24))
-    const version = `${v1}.${v2}.${v3}.${v4}`
-    return version;
+    const v4 = versionPtr[0]%(2^8);
+    const v3 = parseInt((versionPtr[0]-v4)%Math.pow(2, 16)/Math.pow(2, 8));
+    const v2 = parseInt(((versionPtr[0]-v3*256-v4)%Math.pow(2, 24))/Math.pow(2, 16));
+    const v1 = parseInt((versionPtr[0]-v2*512-v3*256-v4)/Math.pow(2, 24));
+    return `${v1}.${v2}.${v3}.${v4}`;
   },
   login() {
     if(!this.isInitialised){
@@ -124,7 +123,7 @@ const voicemeeter = {
     if (this.isConnected) {
       return;
     }
-    if (libvoicemeeter.VBVMR_Login() == 0) {
+    if (libvoicemeeter.VBVMR_Login() === 0) {
       this.isConnected = true;
       this.type = this._getVoicemeeterType();
       this.version = this._getVoicemeeterVersion();
@@ -138,7 +137,7 @@ const voicemeeter = {
     if (!this.isConnected) {
       throw "Not connected ";
     }
-    if (libvoicemeeter.VBVMR_Logout() == 0) {
+    if (libvoicemeeter.VBVMR_Logout() === 0) {
       this.isConnected = false;
       return;
     }
@@ -225,13 +224,13 @@ const voicemeeter = {
         throw interfaceType + " not found";
       }
       return `${interfaceType}[${p.id}].${p.name}=${p.value};`;
-    }).join('\n')
+    }).join('\n');
 
     return this._sendRawParaneterScript(script);
 
   },
 
-}
+};
 
 //Create setter function
 const parameterStripNames = ['mono', 'solo', 'mute', 'gain', 'gate', 'comp'];
@@ -260,7 +259,7 @@ parameterStripNames.forEach(name => {
     }
   }
 
-})
+});
 module.exports = voicemeeter;
 
 // For test only
