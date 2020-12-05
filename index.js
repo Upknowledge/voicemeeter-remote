@@ -84,7 +84,8 @@ const voicemeeter = {
     if (!this.isConnected) {
       throw "Not connected ";
     }
-    var hardwareIdPtr = new Buffer(parameterName.length + 1);
+    // var hardwareIdPtr = new Buffer(parameterName.length + 1);
+    var hardwareIdPtr = Buffer.alloc(parameterName.length + 1);
     hardwareIdPtr.write(parameterName);
     var namePtr = new FloatArray(1);
     libvoicemeeter.VBVMR_GetParameterFloat(hardwareIdPtr,namePtr);
@@ -182,12 +183,16 @@ const voicemeeter = {
     }
   },
 
-  _sendRawParaneterScript(scriptString) {
-    const script = new Buffer(scriptString.length + 1);
+  _sendRawParameterScript(scriptString) {
+    // const script = new Buffer(scriptString.length + 1);
+    const script = Buffer.alloc(scriptString.length + 1);
     script.fill(0);
     script.write(scriptString);
+    //console.log(scriptString)
+    //console.log(script.length)
     return libvoicemeeter.VBVMR_SetParameters(script);
   },
+
   _setParameter(type, name, id, value) {
 
     if (!this.isConnected) {
@@ -202,9 +207,15 @@ const voicemeeter = {
     if (this.voicemeeterConfig[voicemeeterConfigObject].findIndex(strip => strip.id === id) === -1) {
       throw `${interfaceType} ${id} not found`;
     }
+    
+    // const parametersScript = `${interfaceType.toLowerCase()}[${id}].${name.toLowerCase()}=${value}`
+    const parametersScript = `${interfaceType}[${id}].${name}=${value}`
 
-    return this._sendRawParaneterScript(`${interfaceType}[${id}].${name}=${value};`);
+    //console.log(parametersScript)
+
+    return this._sendRawParameterScript(parametersScript);
   },
+
   _setParameters(parameters) {
 
     if (!this.isConnected) {
@@ -228,7 +239,7 @@ const voicemeeter = {
       return `${interfaceType}[${p.id}].${p.name}=${p.value};`;
     }).join('\n');
 
-    return this._sendRawParaneterScript(script);
+    return this._sendRawParameterScript(script);
 
   },
 
@@ -254,6 +265,7 @@ parameterStripNames.forEach(name => {
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
 
   voicemeeter[`setStrip${capitalizedName}`] = function (stripNumber, value) {
+    // console.log(capitalizedName)
     if (typeof (value) === 'boolean') {
       voicemeeter._setParameter(InterfaceType.strip, name, stripNumber, value ? '1' : '0')
     } else {
@@ -291,3 +303,27 @@ async function start(){
 }
 start();
 // */
+
+// async function start () {
+//   await voicemeeter.init()
+//   voicemeeter.login()
+
+
+//   console.log(voicemeeter._getVoicemeeterType())
+//   console.log(voicemeeter._getVoicemeeterVersion())
+//   console.log(voicemeeter.isParametersDirty())
+
+
+
+//   voicemeeter.setStripMute(5, true)
+  
+
+//   setInterval(()=>{
+//     if(voicemeeter.isParametersDirty()){
+//       console.log(voicemeeter.getParameter('Strip[1].gain'));
+//     }
+//     voicemeeter.logout()
+//   },10)
+ 
+// }
+// start()
