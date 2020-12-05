@@ -14,8 +14,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "ffi-napi": "^2.4.3",
-    "ref-array": "^1.2.0",
+    "@saleae/ffi": "3.0.2",
+    "@saleae/ref-array": "2.0.1",
     "winreg": "^1.2.4"
   },
   "repository": {
@@ -24,7 +24,6 @@
   },
   "keywords": [
     "voicemeeter",
-    "remote",
-    ""
+    "remote"
   ]
 }
