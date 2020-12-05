@@ -204,7 +204,10 @@ const voicemeeter = {
     const interfaceType = type === InterfaceType.strip ? 'Strip' : 'Bus';
     const voicemeeterConfigObject = type === InterfaceType.strip ? 'strips' : 'buses';
 
-    if (this.voicemeeterConfig[voicemeeterConfigObject].findIndex(strip => strip.id === id) === -1) {
+    // Convert to number for comparison
+    const idNum = parseInt(id)
+
+    if (this.voicemeeterConfig[voicemeeterConfigObject].findIndex(strip => strip.id == idNum) == -1) {
       throw `${interfaceType} ${id} not found`;
     }
     
