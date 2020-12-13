@@ -1,13 +1,12 @@
-const ref = require('ref');
-// const ffi = require('ffi-napi');
+// const ref = require('ref');
 const ffi = require("@saleae/ffi");
 const Registry = require('winreg');
 
-// const ArrayType = require('ref-array');
 const ArrayType = require('@saleae/ref-array');
 const CharArray = ArrayType('char');
 const LongArray = ArrayType('long');
 const FloatArray = ArrayType('float');
+
 
 async function getDLLPath() {
   const regKey = new Registry({
@@ -48,8 +47,10 @@ const voicemeeter = {
   type: 0,
   version: null,
   voicemeeterConfig: {},
+
   async init(){
     console.debug(await getDLLPath() + '/VoicemeeterRemote64.dll');
+    
     libvoicemeeter = ffi.Library(await getDLLPath() + '/VoicemeeterRemote64.dll', {
       'VBVMR_Login': ['long', []],
       'VBVMR_Logout': ['long', []],
@@ -77,9 +78,11 @@ const voicemeeter = {
     }
     throw "running failed";
   },
+
   isParametersDirty(){
     return libvoicemeeter.VBVMR_IsParametersDirty();
   },
+
   getParameter(parameterName){
     if (!this.isConnected) {
       throw "Not connected ";
@@ -91,6 +94,7 @@ const voicemeeter = {
     libvoicemeeter.VBVMR_GetParameterFloat(hardwareIdPtr,namePtr);
     return namePtr[0]
   },
+
   _getVoicemeeterType() {
     var typePtr = new LongArray(1);
     if (libvoicemeeter.VBVMR_GetVoicemeeterType(typePtr) !== 0) {
@@ -108,6 +112,7 @@ const voicemeeter = {
     }
 
   },
+
   _getVoicemeeterVersion() {
     const versionPtr = new LongArray(1);
     if (libvoicemeeter.VBVMR_GetVoicemeeterVersion(versionPtr) !== 0) {
@@ -119,6 +124,7 @@ const voicemeeter = {
     const v1 = parseInt((versionPtr[0]-v2*512-v3*256-v4)/Math.pow(2, 24));
     return `${v1}.${v2}.${v3}.${v4}`;
   },
+
   login() {
     if(!this.isInitialised){
       throw "await the initialisation before login";
@@ -136,6 +142,7 @@ const voicemeeter = {
     this.isConnected = false;
     throw "Connection failed";
   },
+
   logout() {
     if (!this.isConnected) {
       throw "Not connected ";
@@ -146,6 +153,7 @@ const voicemeeter = {
     }
     throw "Logout failed";
   },
+
   updateDeviceList() {
     if (!this.isConnected) {
       throw "Not connected ";
@@ -184,7 +192,7 @@ const voicemeeter = {
   },
 
   _sendRawParameterScript(scriptString) {
-    // const script = new Buffer(scriptString.length + 1);
+
     const script = Buffer.alloc(scriptString.length + 1);
     script.fill(0);
     script.write(scriptString);
@@ -213,8 +221,6 @@ const voicemeeter = {
     
     // const parametersScript = `${interfaceType.toLowerCase()}[${id}].${name.toLowerCase()}=${value}`
     const parametersScript = `${interfaceType}[${id}].${name}=${value}`
-
-    //console.log(parametersScript)
 
     return this._sendRawParameterScript(parametersScript);
   },
@@ -268,7 +274,7 @@ parameterStripNames.forEach(name => {
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
 
   voicemeeter[`setStrip${capitalizedName}`] = function (stripNumber, value) {
-    // console.log(capitalizedName)
+   
     if (typeof (value) === 'boolean') {
       voicemeeter._setParameter(InterfaceType.strip, name, stripNumber, value ? '1' : '0')
     } else {
