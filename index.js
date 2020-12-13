@@ -1,4 +1,3 @@
-// const ref = require('ref');
 const ffi = require("@saleae/ffi");
 const Registry = require('winreg');
 
@@ -6,7 +5,6 @@ const ArrayType = require('@saleae/ref-array');
 const CharArray = ArrayType('char');
 const LongArray = ArrayType('long');
 const FloatArray = ArrayType('float');
-
 
 async function getDLLPath() {
   const regKey = new Registry({
@@ -42,15 +40,15 @@ let libvoicemeeter;
 const voicemeeter = {
   isConnected: false,
   isInitialised: false,
+  isLoggedIn: false,      // True when login has been performed
+  isConfigured: false,    // True when configuration has been set
   outputDevices: [],
   inputDevices: [],
   type: 0,
   version: null,
   voicemeeterConfig: {},
-
   async init(){
     console.debug(await getDLLPath() + '/VoicemeeterRemote64.dll');
-    
     libvoicemeeter = ffi.Library(await getDLLPath() + '/VoicemeeterRemote64.dll', {
       'VBVMR_Login': ['long', []],
       'VBVMR_Logout': ['long', []],
@@ -78,11 +76,22 @@ const voicemeeter = {
     }
     throw "running failed";
   },
-
   isParametersDirty(){
-    return libvoicemeeter.VBVMR_IsParametersDirty();
-  },
 
+    const res = libvoicemeeter.VBVMR_IsParametersDirty();
+
+    // If Voicemeeter is currently running and connected, res will be 0 or positive
+    this.isConnected = (res >= 0);
+
+    // Get configuration once when we have the first connection to Voicemeeter
+    if (this.isConnected && !this.isConfigured) {
+      this.type = this._getVoicemeeterType();
+      this.version = this._getVoicemeeterVersion();
+      this.voicemeeterConfig = VoicemeeterDefaultConfig[this._getVoicemeeterType()];
+    }
+
+    return res;
+  },
   getParameter(parameterName){
     if (!this.isConnected) {
       throw "Not connected ";
@@ -126,21 +135,26 @@ const voicemeeter = {
   },
 
   login() {
+  
+    // Only one login for the lifetime of this process
+    if (this.isLoggedIn) {
+      return;
+    }
+
     if(!this.isInitialised){
       throw "await the initialisation before login";
     }
-    if (this.isConnected) {
-      return;
-    }
-    if (libvoicemeeter.VBVMR_Login() === 0) {
-      this.isConnected = true;
-      this.type = this._getVoicemeeterType();
-      this.version = this._getVoicemeeterVersion();
-      this.voicemeeterConfig = VoicemeeterDefaultConfig[this._getVoicemeeterType()];
-      return;
-    }
-    this.isConnected = false;
-    throw "Connection failed";
+   
+    const res = libvoicemeeter.VBVMR_Login(); 
+
+    this.isLoggedIn = true;
+    
+    // Login will always succeed. Check isParametersDirty() to find out if connected to Voicemeeter.
+    // Check if we are connected
+    this.isParametersDirty()
+        
+    return;
+    
   },
 
   logout() {
@@ -192,12 +206,9 @@ const voicemeeter = {
   },
 
   _sendRawParameterScript(scriptString) {
-
     const script = Buffer.alloc(scriptString.length + 1);
     script.fill(0);
     script.write(scriptString);
-    //console.log(scriptString)
-    //console.log(script.length)
     return libvoicemeeter.VBVMR_SetParameters(script);
   },
 
